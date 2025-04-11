@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PrecisionBuild</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+  <!-- Animate On Scroll (AOS) -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              100: '#cffafe',
+              300: '#67e8f9',
+              500: '#06b6d4',
+              700: '#0e7490',
+              900: '#164e63'
+            },
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .glass:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-glow {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .btn-glow:hover {
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.5);
+      transform: translateY(-2px);
+    }
+
+    body {
+      background: radial-gradient(ellipse at top left, #e0f7fa, #ecfeff, #ffffff);
+    }
+
+    .bg-blob {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(6,182,212,0.5), transparent 70%);
+      filter: blur(90px);
+      z-index: 0;
+    }
+  </style>
+</head>
+
+<body class="relative font-sans text-gray-800 overflow-x-hidden">
+
+  <!-- Background Blobs -->
+  <div class="bg-blob top-[-100px] left-[-100px]"></div>
+  <div class="bg-blob bottom-[-100px] right-[-100px]"></div>
+
+  <!-- Navigation -->
+  <nav class="bg-white/30 backdrop-blur-md shadow-md z-10 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+      <div class="flex items-center">
+        <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
+        <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+      </div>
+      <div class="hidden md:flex space-x-6 text-gray-700 font-medium">
+        <a href="#features" class="hover:text-primary-600 transition">Features</a>
+        <a href="#testimonials" class="hover:text-primary-600 transition">Testimonials</a>
+        <a href="#pricing" class="hover:text-primary-600 transition">Pricing</a>
+        <a href="#faq" class="hover:text-primary-600 transition">FAQ</a>
+      </div>
+      <div>
+        <a href="/estimator" class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="relative z-10 overflow-hidden py-24 sm:py-32">
+    <div class="max-w-7xl mx-auto px-4 lg:flex lg:items-center">
+      <div class="lg:w-1/2 mb-10 lg:mb-0" data-aos="fade-right">
+        <h1 class="text-5xl sm:text-6xl font-bold leading-tight text-gray-900">
+          Smart <span class="text-primary-500">Construction</span> Estimation
+        </h1>
+        <p class="mt-6 text-lg text-gray-600">Boost your project precision with AI-powered cost estimation tools. Stay under budget, every time.</p>
+        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+          <a href="/estimator" class="px-8 py-3 text-white bg-primary-500 rounded-lg font-medium btn-glow">Start Estimate</a>
+          <a href="#" class="px-8 py-3 bg-white/50 border border-primary-300 text-primary-700 rounded-lg font-medium hover:bg-primary-100 transition">Watch Demo</a>
+        </div>
+      </div>
+      <div class="lg:w-1/2" data-aos="fade-left">
+        <img class="rounded-3xl shadow-lg" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1350&q=80" alt="Construction site" />
+      </div>
+    </div>
+  </header>
+
+  <!-- Features -->
+  <section id="features" class="py-20 relative z-10">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-14" data-aos="fade-up">
+        <h2 class="text-primary-500 font-semibold text-xl uppercase">Features</h2>
+        <p class="mt-2 text-4xl font-extrabold text-gray-900">Smarter Estimations, Seamless Execution</p>
+        <p class="mt-4 text-lg text-gray-600">Powerful features that simplify your cost planning and increase transparency.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div class="glass p-6" data-aos="fade-up">
+          <div class="text-primary-500 mb-4 text-3xl"><i class="fas fa-cubes"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Detailed Cost Breakdown</h3>
+          <p class="text-gray-600">Analyze every aspect of your project budget, from labor to logistics.</p>
+        </div>
+        <div class="glass p-6" data-aos="fade-up" data-aos-delay="100">
+          <div class="text-primary-500 mb-4 text-3xl"><i class="fas fa-brain"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">AI Optimization</h3>
+          <p class="text-gray-600">Get intelligent suggestions based on data-driven insights to cut unnecessary costs.</p>
+        </div>
+        <div class="glass p-6" data-aos="fade-up" data-aos-delay="200">
+          <div class="text-primary-500 mb-4 text-3xl"><i class="fas fa-sync-alt"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Real-Time Market Data</h3>
+          <p class="text-gray-600">Stay ahead with dynamic data integration from verified suppliers and vendors.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials" class="py-20 bg-primary-50 relative z-10">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-12" data-aos="fade-up">
+        <h2 class="text-primary-500 text-xl font-semibold uppercase">Testimonials</h2>
+        <p class="text-3xl font-bold text-gray-900 mt-2">Hear from our happy clients</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="glass p-6" data-aos="fade-up">
+          <div class="flex items-center mb-4">
+            <div class="h-12 w-12 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center font-bold">JD</div>
+            <div class="ml-4">
+              <h4 class="text-lg font-medium text-gray-900">John Dawson</h4>
+              <p class="text-gray-500 text-sm">CEO, Dawson Construction</p>
+            </div>
+          </div>
+          <p class="italic text-gray-600">"PrecisionBuild cut our estimation time by 65% while increasing accuracy."</p>
+          <div class="mt-4 flex text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AOS Animation Script -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      once: true,
+      duration: 800,
+      easing: 'ease-in-out',
+    });
+  </script>
+</body>
+</html>
