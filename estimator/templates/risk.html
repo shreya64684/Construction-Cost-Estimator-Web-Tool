@@ -94,6 +94,9 @@
         .risk-indicator {
             transition: all 0.5s ease;
         }
+
+  
+
         
         .tooltip-container {
             position: relative;
@@ -139,6 +142,8 @@
             transform: translateY(5px);
             transition: all 0.2s ease;
             pointer-events: none;
+            word-wrap: break-word;
+            white-space: normal;
         }
         
         .tooltip-container:hover .tooltip-content {
@@ -160,7 +165,7 @@
         }
     </style>
 </head>
-<body class="font-sans bg-gradient-to-br from-primary-50 to-primary-100 text-gray-800 min-h-screen md:p-8">
+<body class="font-sans bg-gradient-to-br from-primary-50 to-primary-100 text-gray-800 min-h-screen p-4 md:p-8">
      <!-- Navigation -->
   <nav class="bg-white/30 backdrop-blur-md shadow-md z-10 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
@@ -180,19 +185,18 @@
       <div class="hidden md:flex space-x-4 items-center">
         <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
         <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
-        <a href="{% url 'accounts:login' %}" class="text-gray-600 hover:text-primary-500">Login</a>
-        <a href="{% url 'accounts:register' %}"
-          class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
+        <a href="{% url 'user_dashboard' user.id %}" class="text-gray-600 hover:text-primary-500">Dashboard</a>
+        <a href="{% url 'accounts:logout' %}" class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Logout</a>
       </div>
     </div>
     
     <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white/30 backdrop-blur-md absolute w-full z-20">
+    <div id="mobile-menu" class="hidden md:hidden bg-white absolute w-full top-full z-50 shadow-lg">
       <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
         <a href="/" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Home</a>
         <a href="{% url 'riskPredictor' %}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
-        <a href="{% url 'accounts:login' %}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Login</a>
-        <a href="{% url 'accounts:register' %}" class="block px-3 py-2 text-white bg-primary-500 hover:bg-primary-700 rounded-md">Get Started</a>
+        <a href="{% url 'user_dashboard' user.id %}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Dashboard</a>
+        <a href="{% url 'accounts:logout' %}" class="px-4 py-2 rounded-md text-blue bg-primary-600 hover:bg-primary-700 btn-glow">Logout</a>
       </div>
     </div>
   </nav>
@@ -430,7 +434,7 @@
             <!-- Results Section -->
             <div class="lg:col-span-1">
                 {% if predicted_risk %}
-                <div class="glass p-6 rounded-xl shadow-lg animate-slide-up">
+                <div class="glass p-6 rounded-xl shadow-lg animate-slide-up w-full max-w-full">
                     <h2 class="text-2xl font-bold mb-6 text-primary-700 flex items-center">
                         <i class="fas fa-chart-line mr-3"></i> Risk Assessment
                     </h2>
@@ -471,7 +475,7 @@
                     
                     <!-- Risk Factors Chart -->
                     <div class="mb-6">
-                        <canvas id="riskChart" height="200"></canvas>
+                        <canvas id="riskChart" height="200" class="w-full h-64"></canvas>
                         <script>
                             const ctx = document.getElementById('riskChart').getContext('2d');
                             const riskChart = new Chart(ctx, {

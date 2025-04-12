@@ -68,46 +68,46 @@
 </head>
 <body class="relative font-sans text-gray-800 overflow-x-hidden">
     <!-- Background Blobs -->
-    <div class="bg-blob top-[-100px] left-[-100px]"></div>
-    <div class="bg-blob bottom-[-100px] right-[-100px]"></div>
+    <!-- <div class="bg-blob top-[-100px] left-[-100px]"></div>
+    <div class="bg-blob bottom-[-100px] right-[-100px]"></div> -->
 
     <!-- Navigation -->
-    <nav class="bg-white/30 backdrop-blur-md shadow-md z-10 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-            <div class="flex items-center">
-                <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
-                <a href="/" class="text-xl font-bold text-primary-900">PrecisionBuild</a>
-            </div>
-            
-            <!-- Mobile menu button -->
-            <div class="md:hidden flex items-center">
-              <button type="button" id="mobile-menu-button" class="text-gray-600 hover:text-primary-500 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-              </button>
-            </div>
-            
-            <!-- Desktop Menu -->
-            <div class="hidden md:flex space-x-4 items-center">
-                <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
-                <a href="{% url 'accounts:register' %}" class="text-gray-600 hover:text-primary-500">Register</a>
-            </div>
-        </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white/30 backdrop-blur-md absolute w-full z-20">
-          <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a href="/" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Home</a>
-            <a href="{% url 'accounts:register' %}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Register</a>
-          </div>
-        </div>
-    </nav>
+  <nav class="bg-white/30 backdrop-blur-md shadow-md z-50 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+      <div class="flex items-center">
+        <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
+        <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+      </div>
+      
+      <!-- Mobile menu button -->
+      <div class="md:hidden flex items-center">
+        <button type="button" id="mobile-menu-button" class="text-gray-600 hover:text-primary-500 focus:outline-none">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+      
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex space-x-4 items-center">
+        <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
+        <a href="{% url 'accounts:register' %}" class="block px-3 py-2 text-white bg-primary-500 hover:bg-primary-700 rounded-md">Register</a>
+      </div>
+    </div>
     
-    <script>
-      document.getElementById('mobile-menu-button').addEventListener('click', function() {
-        const menu = document.getElementById('mobile-menu');
-        menu.classList.toggle('hidden');
-      });
-    </script>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white absolute w-full top-full z-50 shadow-lg pointer-events-auto">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <a href="/" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Home</a>
+        <a href="{% url 'accounts:register' %}" class="block px-3 py-2 text-white bg-primary-500 hover:bg-primary-700 rounded-md">Register</a>
+      </div>
+    </div>
+  </nav>
+  
+  <script>
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    });
+  </script>
 
     <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="glass max-w-md w-full p-8 space-y-8">

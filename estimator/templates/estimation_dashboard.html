@@ -183,18 +183,17 @@
         <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
         <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
         <a href="{% url 'user_dashboard' user.id %}" class="text-gray-600 hover:text-primary-500">Dashboard</a>
-        <a href="{% url 'accounts:register' %}"
-          class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
+        <a href="{% url 'accounts:logout' %}" class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Logout</a>
       </div>
     </div>
     
     <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white/30 backdrop-blur-md absolute w-full z-20">
+    <div id="mobile-menu" class="hidden md:hidden bg-white absolute w-full top-full z-50 shadow-lg pointer-events-auto">
       <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
         <a href="/" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Home</a>
         <a href="{% url 'riskPredictor' %}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
         <a href="{% url 'user_dashboard' user.id%}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Dashboard</a>
-        <a href="{% url 'accounts:register' %}" class="block px-3 py-2 text-white bg-primary-500 hover:bg-primary-700 rounded-md">Get Started</a>
+        <a href="{% url 'accounts:logout' %}" class="block px-3 py-2 text-white bg-primary-500 hover:bg-primary-700 rounded-md">Logout</a>
       </div>
     </div>
   </nav>
@@ -591,7 +590,7 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         // Use environment variable or secure storage for API key
-        const API_KEY = 'AIzaSyDD8vgyPzWGCjh3zNxN25lk33eumZ6JHZ4'; // Replace with your valid API key
+        const API_KEY = 'AIzaSyD-dLCEbox7f5a76Qn7JP0rARNikUa7A6k'; // Replace with your valid API key
         initAIAssistant(API_KEY);
       });
     </script>
