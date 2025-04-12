@@ -177,16 +177,38 @@
           <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
           <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
         </div>
-        <div class="flex space-x-4 items-center">
+        
+        <!-- Mobile menu button -->
+        <div class="md:hidden flex items-center">
+          <button type="button" id="mobile-menu-button" class="text-gray-600 hover:text-primary-500 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+        
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex space-x-4 items-center">
           <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
           <a href="{% url 'accounts:login' %}" class="text-gray-600 hover:text-primary-500">Login</a>
-          <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
-        </div>
-        <div>
           <a href="{% url 'accounts:register' %}" class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
         </div>
       </div>
+      
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden md:hidden bg-white/30 backdrop-blur-md absolute w-full z-20">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <a href="/" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Home</a>
+          <a href="{% url 'accounts:login' %}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Login</a>
+          <a href="{% url 'accounts:register' %}" class="block px-3 py-2 text-white bg-primary-500 hover:bg-primary-700 rounded-md">Get Started</a>
+        </div>
+      </div>
     </nav>
+    
+    <script>
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+      });
+    </script>
 
   <!-- Hero Section -->
   <header class="relative z-10 overflow-hidden py-24 sm:py-32">
@@ -197,7 +219,7 @@
         </h1>
         <p class="mt-6 text-xl text-gray-600 leading-relaxed">Boost your project precision with AI-powered cost estimation tools. Reduce estimation time by 65% while increasing accuracy.</p>
         <div class="mt-10 flex flex-col sm:flex-row gap-4">
-          <a href="/estimator" class="px-8 py-4 text-white bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-600 hover:to-primary-500 rounded-xl font-medium btn-glow shadow-soft flex items-center justify-center">
+          <a href="{% url 'accounts:register' %}" class="px-8 py-4 text-white bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-600 hover:to-primary-500 rounded-xl font-medium btn-glow shadow-soft flex items-center justify-center">
             <i class="fas fa-bolt mr-3"></i> Start Free Estimate
           </a>
           <a href="#" class="px-8 py-4 bg-white/70 border border-primary-200 text-primary-700 rounded-xl font-medium hover:bg-primary-50 transition flex items-center justify-center">
@@ -242,19 +264,6 @@
     </div>
   </header>
 
-  <!-- Client Logos -->
-  <!-- <div class="py-12 bg-white/50 border-y border-gray-100 relative z-10">
-    <div class="max-w-7xl mx-auto px-4">
-      <p class="text-center text-gray-500 mb-8">Trusted by leading construction firms</p>
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-center">
-        <img src="https://via.placeholder.com/150x60?text=BuildCorp" alt="BuildCorp" class="h-10 opacity-70 hover:opacity-100 transition">
-        <img src="https://via.placeholder.com/150x60?text=Construct+" alt="Construct+" class="h-12 opacity-70 hover:opacity-100 transition">
-        <img src="https://via.placeholder.com/150x60?text=UrbanBuild" alt="UrbanBuild" class="h-8 opacity-70 hover:opacity-100 transition">
-        <img src="https://via.placeholder.com/150x60?text=ArcDesign" alt="ArcDesign" class="h-14 opacity-70 hover:opacity-100 transition">
-        <img src="https://via.placeholder.com/150x60?text=StructCo" alt="StructCo" class="h-10 opacity-70 hover:opacity-100 transition">
-      </div>
-    </div>
-  </div> -->
 
   <!-- Features -->
   <section id="features" class="py-20 relative z-10 section-border">
@@ -297,10 +306,10 @@
           <h3 class="text-2xl font-bold text-gray-900 mb-4">Ready to transform your estimation process?</h3>
           <p class="text-lg text-gray-600 mb-8">Join thousands of contractors who save an average of 15 hours per project with PrecisionBuild.</p>
           <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="/estimator" class="px-8 py-4 text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-xl font-medium btn-glow shadow-soft">
+            <a href="{% url 'accounts:login' %}" class="px-8 py-4 text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-xl font-medium btn-glow shadow-soft">
               Start Your Free Estimate <i class="fas fa-arrow-right ml-2"></i>
             </a>
-            <a href="/demo" class="px-8 py-4 bg-white text-primary-700 border border-primary-200 hover:bg-primary-50 rounded-xl font-medium">
+            <a href="{% url 'accounts:login' %}" class="px-8 py-4 bg-white text-primary-700 border border-primary-200 hover:bg-primary-50 rounded-xl font-medium">
               Schedule a Demo <i class="fas fa-calendar-alt ml-2"></i>
             </a>
           </div>
@@ -397,10 +406,10 @@
         <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to revolutionize your construction estimates?</h2>
         <p class="text-xl text-primary-100 mb-10">Join the thousands of professionals who trust PrecisionBuild for accurate, AI-powered construction estimations.</p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-          <a href="/signup" class="px-8 py-4 bg-white text-primary-700 font-bold rounded-xl hover:bg-gray-100 transition shadow-lg">
+          <a href="{% url 'accounts:login' %}" class="px-8 py-4 bg-white text-primary-700 font-bold rounded-xl hover:bg-gray-100 transition shadow-lg">
             Get Started Free <i class="fas fa-arrow-right ml-2"></i>
           </a>
-          <a href="/demo" class="px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-primary-700 transition">
+          <a href="{% url 'accounts:login' %}" class="px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-primary-700 transition">
             Book a Demo <i class="fas fa-calendar-alt ml-2"></i>
           </a>
         </div>

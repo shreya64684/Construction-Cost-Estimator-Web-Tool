@@ -106,6 +106,10 @@
 
   <!-- Load Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 
   <!-- Custom Styles -->
   <style>
@@ -160,40 +164,73 @@
 <body class="min-h-screen bg-gradient-to-br from-primary-50 to-white">
 
   <!-- Navigation -->
-  <nav class="bg-white shadow-md z-10 relative">
+  <nav class="bg-white/30 backdrop-blur-md shadow-md z-10 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
       <div class="flex items-center">
         <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
         <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
       </div>
-      <div class="flex space-x-4 items-center">
+      
+      <!-- Mobile menu button -->
+      <div class="md:hidden flex items-center">
+        <button type="button" id="mobile-menu-button" class="text-gray-600 hover:text-primary-500 focus:outline-none">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+      
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex space-x-4 items-center">
+        <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
         <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
         <a href="{% url 'user_dashboard' user.id %}" class="text-gray-600 hover:text-primary-500">Dashboard</a>
-        <a href="{% url 'accounts:logout' %}" class="text-gray-600 hover:text-primary-500">Logout</a>
+        <a href="{% url 'accounts:register' %}"
+          class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
+      </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white/30 backdrop-blur-md absolute w-full z-20">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <a href="/" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Home</a>
+        <a href="{% url 'riskPredictor' %}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
+        <a href="{% url 'user_dashboard' user.id%}" class="block px-3 py-2 text-gray-600 hover:text-primary-500">Dashboard</a>
+        <a href="{% url 'accounts:register' %}" class="block px-3 py-2 text-white bg-primary-500 hover:bg-primary-700 rounded-md">Get Started</a>
       </div>
     </div>
   </nav>
+  
+  <script>
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    });
+  </script>
 
-  <div id="dashboard-report">
+  <div id="pdf-export-content">
+  <!-- <div id="dashboard-report"> -->
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <!-- Header Section -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 class="text-3xl md:text-4xl font-bold text-primary-800 tracking-tight">
-            <span class="gradient-text">Estimation Dashboard</span> for {{ project.project_name }}
-          </h1>
-          <p class="text-secondary-500 mt-2">Created on {{ project.created_at|date:"M d, Y" }}</p>
-        </div>
-        <div class="flex gap-3">
-          <button onclick="downloadPDF()"
-            class="px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2 justify-center">
-            <i class="fas fa-download"></i> Export PDF
-          </button>
+      <div class="report-header">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-primary-800 tracking-tight">
+              <span class="gradient-text">Estimation Dashboard</span> for {{ project.project_name }}
+            </h1>
+            <p class="text-secondary-500 mt-2">Created on {{ project.created_at|date:"M d, Y" }}</p>
+          </div>
+          <div class="flex gap-3">
+            <button  id="exportPdfBtn"
+              class="px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2 justify-center">
+              <i class="fas fa-download"></i> Export PDF
+            </button>
+          </div>
         </div>
       </div>
 
+      
       <div id="dashboard-report">
+      <div class="summary-section"></div>
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <!-- Total Cost Card -->
@@ -250,105 +287,103 @@
             </div>
           </div>
         </div>
+      </div>  
 
+     
         <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <!-- Monthly Cost Timeline -->
-          <div class="card p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-primary-800 flex items-center">
-                <i class="fas fa-chart-line text-primary-500 mr-3"></i> Monthly Cost Timeline
-              </h2>
-              <div class="flex gap-2">
-                <button class="px-3 py-1 text-xs bg-primary-100 text-primary-600 rounded-full">6 Months</button>
+        <div class="charts-section">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          
+              <!-- Monthly Cost Timeline -->
+              <div class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-primary-800 flex items-center">
+                    <i class="fas fa-chart-line text-primary-500 mr-3"></i> Monthly Cost Timeline
+                  </h2>
+                  <div class="flex gap-2">
+                    <button class="px-3 py-1 text-xs bg-primary-100 text-primary-600 rounded-full">6 Months</button>
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <canvas id="barChart"></canvas>
+                </div>
               </div>
-            </div>
-            <div class="chart-container">
-              <canvas id="barChart"></canvas>
-            </div>
-          </div>
 
-          <div class="card p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-primary-800 flex items-center">
-                <i class="fas fa-chart-line text-primary-500 mr-3"></i>Project Stage Timeline
-              </h2>
-            </div>
-            <div class="chart-container">
-              <canvas id="timelineChart" height="120"></canvas>
-            </div>
-          </div>
-
-          <!-- Cost Distribution -->
-          <div class="card p-6">
-            <h2 class="text-xl font-semibold text-primary-800 mb-4 flex items-center">
-              <i class="fas fa-chart-pie text-primary-500 mr-3"></i> Cost Distribution
-            </h2>
-            <div class="chart-container">
-              <canvas id="pieChart"></canvas>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              {% for item in material_breakdown %}
-              <div class="px-3 py-1 text-xs rounded-full"
-                style="background-color: {{ item.color }}20; color: {{ item.color }}; border: 1px solid {{ item.color }}40;">
-                {{ item.name }} ({{ item.percent }})
+              <div class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-primary-800 flex items-center">
+                    <i class="fas fa-chart-line text-primary-500 mr-3"></i>Project Stage Timeline
+                  </h2>
+                </div>
+                <div class="chart-container">
+                  <canvas id="timelineChart" height="120"></canvas>
+                </div>
               </div>
-              {% endfor %}
-            </div>
+
+              <!-- Cost Distribution -->
+              <div class="card p-6">
+                <h2 class="text-xl font-semibold text-primary-800 mb-4 flex items-center">
+                  <i class="fas fa-chart-pie text-primary-500 mr-3"></i> Cost Distribution
+                </h2>
+                <div class="chart-container">
+                  <canvas id="pieChart"></canvas>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {% for item in material_breakdown %}
+                  <div class="px-3 py-1 text-xs rounded-full"
+                    style="background-color: {{ item.color }}20; color: {{ item.color }}; border: 1px solid {{ item.color }}40;">
+                    {{ item.name }} ({{ item.percent }})
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
           </div>
         </div>
 
-        <!-- Material Breakdown -->
-        <div class="card p-6 mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-primary-800 flex items-center">
-              <i class="fas fa-cubes text-primary-500 mr-3"></i> Material Cost Breakdown
-            </h2>
-            <!-- <div class="relative">
-              <select
-                class="appearance-none bg-gray-100 border-0 rounded-lg pl-3 pr-8 py-2 text-sm focus:ring-2 focus:ring-primary-200">
-                <option>Sort by Cost</option>
-                <option>Sort by Material</option>
-                <option>Sort by Percentage</option>
-              </select>
-              <i class="fas fa-chevron-down absolute right-3 top-3 text-xs text-gray-500"></i>
-            </div> -->
-          </div>
+        <div class="tables-section">
+          <!-- Material Breakdown -->
+          <div class="card p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-primary-800 flex items-center">
+                <i class="fas fa-cubes text-primary-500 mr-3"></i> Material Cost Breakdown
+              </h2>
+             
+            </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="border-b border-gray-200 text-gray-500 text-left">
-                  <th class="pb-3 font-medium">Material</th>
-                  <th class="pb-3 font-medium text-right">Percentage</th>
-                  <th class="pb-3 font-medium text-right">Estimated Cost</th>
-              
-                </tr>
-              </thead>
-              <tbody>
-                {% for item in material_breakdown %}
-                <tr class="border-b border-gray-100 hover:bg-gray-50">
-                  <td class="py-4">
-                    <div class="flex items-center">
-                      <div class="w-3 h-3 rounded-full mr-3" style="background-color: {{ item.color }}"></div>
-                      {{ item.name }}
-                    </div>
-                  </td>
-                  <td class="py-4 text-right">
-                    <span class="font-medium">{{ item.percent }}</span>
-                  </td>
-                  <td class="py-4 text-right font-medium">₹{{ item.amount|intcomma }}</td>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="border-b border-gray-200 text-gray-500 text-left">
+                    <th class="pb-3 font-medium">Material</th>
+                    <th class="pb-3 font-medium text-right">Percentage</th>
+                    <th class="pb-3 font-medium text-right">Estimated Cost</th>
                 
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in material_breakdown %}
+                  <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-4">
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 rounded-full mr-3" style="background-color: {{ item.color }}"></div>
+                        {{ item.name }}
+                      </div>
+                    </td>
+                    <td class="py-4 text-right">
+                      <span class="font-medium">{{ item.percent }}</span>
+                    </td>
+                    <td class="py-4 text-right font-medium">₹{{ item.amount|intcomma }}</td>
+                  
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-end">
-          <button
+          <button id="exportPdfBtn"
             class="px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2 justify-center">
             <i class="fas fa-download"></i> Export PDF
           </button>
@@ -378,7 +413,10 @@
                   <i class="fas fa-paper-plane"></i>
                 </button>
               </div>
-             
+              <button id="voice-btn">
+                <i class="fas fa-microphone"></i>
+                <span>Speak</span>
+              </button>
             </div>
           </div>
         </div>
@@ -562,30 +600,73 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   
     <script>
-      async function downloadPDF() {
-        const element = document.getElementById('dashboard-report');
+      document.getElementById("exportPdfBtn").addEventListener("click", async () => {
+      const { jsPDF } = window.jspdf;
 
-        // Scroll to top to ensure full capture
-        window.scrollTo(0, 0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        const canvas = await html2canvas(element, {
-          scale: 2, // higher resolution
-          useCORS: true
-        });
+      const content = document.getElementById("pdf-export-content");
 
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
+      // 🔧 Handle gradient text fallback
+      const gradientTextEl = content.querySelector(".gradient-text");
+      let originalClass = "";
+      let originalColor = "";
 
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('Construction_Estimation_Report.pdf');
+      if (gradientTextEl) {
+        originalClass = gradientTextEl.className;
+        originalColor = gradientTextEl.style.color;
+        gradientTextEl.classList.remove("gradient-text");
+        gradientTextEl.style.color = "#1e40af"; // fallback to Tailwind's primary-800
       }
+
+      // Capture with html2canvas
+      const canvas = await html2canvas(content, {
+        scale: 2,
+        useCORS: true,
+      });
+
+      // Restore gradient style after capture
+      if (gradientTextEl) {
+        gradientTextEl.className = originalClass;
+        gradientTextEl.style.color = originalColor;
+      }
+
+      const imgData = canvas.toDataURL("image/png");
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pdfWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+      let position = 0;
+
+      if (imgHeight < pdfHeight) {
+        // Fit on single page
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      } else {
+        // Add image across multiple pages
+        let heightLeft = imgHeight;
+
+        while (heightLeft > 0) {
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight;
+          position -= pdfHeight;
+
+          if (heightLeft > 0) {
+            pdf.addPage();
+          }
+        }
+      }
+
+      pdf.save("dashboard-report.pdf");
+    });
+
+
     </script>
+    
 
 </body>
 
