@@ -10,7 +10,7 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, 'Registration successful!')
-            return redirect('user_dashboard')
+            return redirect('user_dashboard', user_id=request.user.id)
         else:
             messages.error(request, 'Registration failed. Please correct the errors.')
     else:
