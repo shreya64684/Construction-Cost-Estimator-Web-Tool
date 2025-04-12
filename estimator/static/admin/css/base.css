@@ -1,0 +1,54 @@
+/* Custom admin styles to match PrecisionBuild design */
+:root {
+  --primary-50: #f0f9ff;
+  --primary-100: #e0f2fe;
+  --primary-500: #0ea5e9;
+  --primary-600: #0284c7;
+  --primary-900: #0c4a6e;
+  --secondary-500: #64748b;
+  --secondary-900: #0f172a;
+}
+
+/* Header */
+#header {
+  background: var(--primary-900);
+  color: white;
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: var(--primary-500);
+  color: white;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+  background: var(--primary-600);
+}
+
+/* Links */
+a:link, a:visited {
+  color: var(--primary-500);
+}
+
+a:hover {
+  color: var(--primary-600);
+}
+
+/* Forms */
+input[type=text], input[type=password], input[type=email], input[type=url],
+input[type=number], input[type=tel], textarea, select, .vTextField {
+  border: 1px solid var(--secondary-500);
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  background: var(--primary-50);
+  border: none;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  #header {
+    padding: 10px;
+  }
+}

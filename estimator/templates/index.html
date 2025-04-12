@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PrecisionBuild</title>
+  <title>PrecisionBuild - AI Construction Estimation</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
@@ -26,12 +26,24 @@
           },
           colors: {
             primary: {
+              50: '#ecfeff',
               100: '#cffafe',
+              200: '#a5f3fc',
               300: '#67e8f9',
+              400: '#22d3ee',
               500: '#06b6d4',
+              600: '#0891b2',
               700: '#0e7490',
+              800: '#155e75',
               900: '#164e63'
             },
+            dark: {
+              900: '#0f172a'
+            }
+          },
+          boxShadow: {
+            'soft': '0 15px 30px -15px rgba(6, 182, 212, 0.3)',
+            'glow': '0 0 20px rgba(6, 182, 212, 0.5)'
           }
         }
       }
@@ -40,40 +52,114 @@
 
   <style>
     .glass {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.15);
       border-radius: 1.5rem;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       transition: all 0.3s ease-in-out;
     }
 
     .glass:hover {
       transform: translateY(-5px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
     }
 
     .btn-glow {
       transition: all 0.3s ease-in-out;
+      position: relative;
+      overflow: hidden;
     }
 
     .btn-glow:hover {
-      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.5);
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.7);
       transform: translateY(-2px);
     }
 
+    .btn-glow::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .btn-glow:hover::after {
+      opacity: 0.4;
+    }
+
     body {
-      background: radial-gradient(ellipse at top left, #e0f7fa, #ecfeff, #ffffff);
+      background: radial-gradient(ellipse at top left, #f0fdfa, #ecfeff, #ffffff);
+      min-height: 100vh;
     }
 
     .bg-blob {
       position: absolute;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(6,182,212,0.5), transparent 70%);
-      filter: blur(90px);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(6,182,212,0.4), transparent 70%);
+      filter: blur(100px);
       z-index: 0;
+      opacity: 0.8;
+    }
+
+    .section-border {
+      position: relative;
+    }
+
+    .section-border::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent);
+    }
+
+    .feature-card {
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+
+    .feature-card:hover {
+      border-color: rgba(6,182,212,0.5);
+      box-shadow: 0 10px 25px -10px rgba(6,182,212,0.4);
+    }
+
+    .nav-link {
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #06b6d4;
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .testimonial-card {
+      border: 1px solid rgba(6,182,212,0.2);
+      background: rgba(255,255,255,0.7);
+    }
+
+    .testimonial-card:hover {
+      background: rgba(255,255,255,0.9);
     }
   </style>
 </head>
@@ -81,97 +167,305 @@
 <body class="relative font-sans text-gray-800 overflow-x-hidden">
 
   <!-- Background Blobs -->
-  <div class="bg-blob top-[-100px] left-[-100px]"></div>
-  <div class="bg-blob bottom-[-100px] right-[-100px]"></div>
+  <div class="bg-blob top-[-200px] left-[-200px]"></div>
+  <div class="bg-blob bottom-[-200px] right-[-200px]"></div>
 
-  <!-- Navigation -->
-  <nav class="bg-white/30 backdrop-blur-md shadow-md z-10 relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-      <div class="flex items-center">
-        <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
-        <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+    <!-- Navigation -->
+    <nav class="bg-white/30 backdrop-blur-md shadow-md z-10 relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+        <div class="flex items-center">
+          <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
+          <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+        </div>
+        <div class="flex space-x-4 items-center">
+          <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
+          <a href="{% url 'accounts:login' %}" class="text-gray-600 hover:text-primary-500">Login</a>
+          <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
+        </div>
+        <div>
+          <a href="{% url 'accounts:register' %}" class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
+        </div>
       </div>
-      <div class="hidden md:flex space-x-6 text-gray-700 font-medium">
-        <a href="#features" class="hover:text-primary-600 transition">Features</a>
-        <a href="#testimonials" class="hover:text-primary-600 transition">Testimonials</a>
-        <a href="#pricing" class="hover:text-primary-600 transition">Pricing</a>
-        <a href="#faq" class="hover:text-primary-600 transition">FAQ</a>
-      </div>
-      <div>
-        <a href="/estimator" class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
-      </div>
-    </div>
-  </nav>
+    </nav>
 
   <!-- Hero Section -->
   <header class="relative z-10 overflow-hidden py-24 sm:py-32">
-    <div class="max-w-7xl mx-auto px-4 lg:flex lg:items-center">
+    <div class="max-w-7xl mx-auto px-4 lg:flex lg:items-center lg:justify-between">
       <div class="lg:w-1/2 mb-10 lg:mb-0" data-aos="fade-right">
         <h1 class="text-5xl sm:text-6xl font-bold leading-tight text-gray-900">
-          Smart <span class="text-primary-500">Construction</span> Estimation
+          <span class="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">Smart Construction</span> Estimation
         </h1>
-        <p class="mt-6 text-lg text-gray-600">Boost your project precision with AI-powered cost estimation tools. Stay under budget, every time.</p>
-        <div class="mt-8 flex flex-col sm:flex-row gap-4">
-          <a href="/estimator" class="px-8 py-3 text-white bg-primary-500 rounded-lg font-medium btn-glow">Start Estimate</a>
-          <a href="#" class="px-8 py-3 bg-white/50 border border-primary-300 text-primary-700 rounded-lg font-medium hover:bg-primary-100 transition">Watch Demo</a>
+        <p class="mt-6 text-xl text-gray-600 leading-relaxed">Boost your project precision with AI-powered cost estimation tools. Reduce estimation time by 65% while increasing accuracy.</p>
+        <div class="mt-10 flex flex-col sm:flex-row gap-4">
+          <a href="/estimator" class="px-8 py-4 text-white bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-600 hover:to-primary-500 rounded-xl font-medium btn-glow shadow-soft flex items-center justify-center">
+            <i class="fas fa-bolt mr-3"></i> Start Free Estimate
+          </a>
+          <a href="#" class="px-8 py-4 bg-white/70 border border-primary-200 text-primary-700 rounded-xl font-medium hover:bg-primary-50 transition flex items-center justify-center">
+            <i class="fas fa-play-circle mr-3"></i> Watch Demo
+          </a>
+        </div>
+        <div class="mt-8 flex items-center">
+          <div class="flex -space-x-2">
+            <img class="w-10 h-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+            <img class="w-10 h-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+            <img class="w-10 h-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/68.jpg" alt="User">
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-700">Trusted by 500+ contractors</p>
+            <div class="flex mt-1">
+              <i class="fas fa-star text-yellow-400 text-sm"></i>
+              <i class="fas fa-star text-yellow-400 text-sm"></i>
+              <i class="fas fa-star text-yellow-400 text-sm"></i>
+              <i class="fas fa-star text-yellow-400 text-sm"></i>
+              <i class="fas fa-star text-yellow-400 text-sm"></i>
+              <span class="text-xs text-gray-500 ml-1">4.9/5</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="lg:w-1/2" data-aos="fade-left">
-        <img class="rounded-3xl shadow-lg" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1350&q=80" alt="Construction site" />
+        <div class="relative">
+          <img class="rounded-3xl shadow-xl border-4 border-white/50" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1350&q=80" alt="Construction site" />
+          <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg border border-gray-100">
+            <div class="flex items-center">
+              <div class="bg-primary-100 p-3 rounded-full text-primary-600">
+                <i class="fas fa-chart-line text-xl"></i>
+              </div>
+              <div class="ml-3">
+                <p class="font-bold text-gray-900">+97% Accuracy</p>
+                <p class="text-xs text-gray-500">AI Estimation</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Features -->
-  <section id="features" class="py-20 relative z-10">
+  <!-- Client Logos -->
+  <!-- <div class="py-12 bg-white/50 border-y border-gray-100 relative z-10">
     <div class="max-w-7xl mx-auto px-4">
-      <div class="text-center mb-14" data-aos="fade-up">
-        <h2 class="text-primary-500 font-semibold text-xl uppercase">Features</h2>
-        <p class="mt-2 text-4xl font-extrabold text-gray-900">Smarter Estimations, Seamless Execution</p>
-        <p class="mt-4 text-lg text-gray-600">Powerful features that simplify your cost planning and increase transparency.</p>
+      <p class="text-center text-gray-500 mb-8">Trusted by leading construction firms</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-center">
+        <img src="https://via.placeholder.com/150x60?text=BuildCorp" alt="BuildCorp" class="h-10 opacity-70 hover:opacity-100 transition">
+        <img src="https://via.placeholder.com/150x60?text=Construct+" alt="Construct+" class="h-12 opacity-70 hover:opacity-100 transition">
+        <img src="https://via.placeholder.com/150x60?text=UrbanBuild" alt="UrbanBuild" class="h-8 opacity-70 hover:opacity-100 transition">
+        <img src="https://via.placeholder.com/150x60?text=ArcDesign" alt="ArcDesign" class="h-14 opacity-70 hover:opacity-100 transition">
+        <img src="https://via.placeholder.com/150x60?text=StructCo" alt="StructCo" class="h-10 opacity-70 hover:opacity-100 transition">
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        <div class="glass p-6" data-aos="fade-up">
-          <div class="text-primary-500 mb-4 text-3xl"><i class="fas fa-cubes"></i></div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Detailed Cost Breakdown</h3>
-          <p class="text-gray-600">Analyze every aspect of your project budget, from labor to logistics.</p>
+    </div>
+  </div> -->
+
+  <!-- Features -->
+  <section id="features" class="py-20 relative z-10 section-border">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-16" data-aos="fade-up">
+        <span class="inline-block px-4 py-1 rounded-full bg-primary-100 text-primary-600 font-medium mb-4">Features</span>
+        <h2 class="text-4xl font-extrabold text-gray-900 mb-4">Smarter Estimations, <span class="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">Seamless Execution</span></h2>
+        <p class="max-w-2xl mx-auto text-lg text-gray-600">Powerful features that simplify your cost planning and increase transparency across all project phases.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="glass feature-card p-8" data-aos="fade-up">
+          <div class="text-primary-500 mb-6 text-4xl"><i class="fas fa-cubes"></i></div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Detailed Cost Breakdown</h3>
+          <p class="text-gray-600 mb-4">Analyze every aspect of your project budget, from labor to logistics with our comprehensive cost analysis tools.</p>
+          <a href="#" class="text-primary-600 font-medium inline-flex items-center group">
+            Learn more <i class="fas fa-arrow-right ml-2 group-hover:ml-3 transition-all"></i>
+          </a>
         </div>
-        <div class="glass p-6" data-aos="fade-up" data-aos-delay="100">
-          <div class="text-primary-500 mb-4 text-3xl"><i class="fas fa-brain"></i></div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">AI Optimization</h3>
-          <p class="text-gray-600">Get intelligent suggestions based on data-driven insights to cut unnecessary costs.</p>
+        <div class="glass feature-card p-8" data-aos="fade-up" data-aos-delay="100">
+          <div class="text-primary-500 mb-6 text-4xl"><i class="fas fa-brain"></i></div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">AI Optimization</h3>
+          <p class="text-gray-600 mb-4">Get intelligent suggestions based on data-driven insights to cut unnecessary costs and optimize your budget.</p>
+          <a href="#" class="text-primary-600 font-medium inline-flex items-center group">
+            Learn more <i class="fas fa-arrow-right ml-2 group-hover:ml-3 transition-all"></i>
+          </a>
         </div>
-        <div class="glass p-6" data-aos="fade-up" data-aos-delay="200">
-          <div class="text-primary-500 mb-4 text-3xl"><i class="fas fa-sync-alt"></i></div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Real-Time Market Data</h3>
-          <p class="text-gray-600">Stay ahead with dynamic data integration from verified suppliers and vendors.</p>
+        <div class="glass feature-card p-8" data-aos="fade-up" data-aos-delay="200">
+          <div class="text-primary-500 mb-6 text-4xl"><i class="fas fa-sync-alt"></i></div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Real-Time Market Data</h3>
+          <p class="text-gray-600 mb-4">Stay ahead with dynamic data integration from verified suppliers and vendors, updated in real-time.</p>
+          <a href="#" class="text-primary-600 font-medium inline-flex items-center group">
+            Learn more <i class="fas fa-arrow-right ml-2 group-hover:ml-3 transition-all"></i>
+          </a>
+        </div>
+      </div>
+      
+      <!-- CTA Section -->
+      <div class="mt-20 glass p-8 rounded-2xl bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200" data-aos="fade-up">
+        <div class="max-w-4xl mx-auto text-center">
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">Ready to transform your estimation process?</h3>
+          <p class="text-lg text-gray-600 mb-8">Join thousands of contractors who save an average of 15 hours per project with PrecisionBuild.</p>
+          <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="/estimator" class="px-8 py-4 text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-xl font-medium btn-glow shadow-soft">
+              Start Your Free Estimate <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+            <a href="/demo" class="px-8 py-4 bg-white text-primary-700 border border-primary-200 hover:bg-primary-50 rounded-xl font-medium">
+              Schedule a Demo <i class="fas fa-calendar-alt ml-2"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Testimonials -->
-  <section id="testimonials" class="py-20 bg-primary-50 relative z-10">
+  <section id="testimonials" class="py-20 bg-gradient-to-b from-primary-50 to-white relative z-10">
     <div class="max-w-7xl mx-auto px-4">
-      <div class="text-center mb-12" data-aos="fade-up">
-        <h2 class="text-primary-500 text-xl font-semibold uppercase">Testimonials</h2>
-        <p class="text-3xl font-bold text-gray-900 mt-2">Hear from our happy clients</p>
+      <div class="text-center mb-16" data-aos="fade-up">
+        <span class="inline-block px-4 py-1 rounded-full bg-primary-100 text-primary-600 font-medium mb-4">Testimonials</span>
+        <h2 class="text-4xl font-extrabold text-gray-900 mb-4">Trusted by <span class="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">Industry Leaders</span></h2>
+        <p class="max-w-2xl mx-auto text-lg text-gray-600">Don't just take our word for it - hear what our clients have to say.</p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="glass p-6" data-aos="fade-up">
-          <div class="flex items-center mb-4">
-            <div class="h-12 w-12 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center font-bold">JD</div>
+        <div class="glass testimonial-card p-8 rounded-2xl" data-aos="fade-up">
+          <div class="flex items-center mb-6">
+            <div class="h-14 w-14 bg-gradient-to-r from-primary-500 to-primary-400 text-white rounded-full flex items-center justify-center font-bold text-xl">JD</div>
             <div class="ml-4">
-              <h4 class="text-lg font-medium text-gray-900">John Dawson</h4>
-              <p class="text-gray-500 text-sm">CEO, Dawson Construction</p>
+              <h4 class="text-lg font-bold text-gray-900">John Dawson</h4>
+              <p class="text-gray-500">CEO, Dawson Construction</p>
             </div>
           </div>
-          <p class="italic text-gray-600">"PrecisionBuild cut our estimation time by 65% while increasing accuracy."</p>
-          <div class="mt-4 flex text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="italic text-gray-600 mb-6">"PrecisionBuild cut our estimation time by 65% while increasing accuracy. We've saved over $200k in unexpected costs on our last three projects."</p>
+          <div class="flex text-yellow-400 mb-2">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <div class="border-t border-gray-100 pt-4 mt-4">
+            <p class="text-sm text-gray-500">Project: Commercial Complex ($12M)</p>
+          </div>
+        </div>
+        <div class="glass testimonial-card p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+          <div class="flex items-center mb-6">
+            <div class="h-14 w-14 bg-gradient-to-r from-primary-500 to-primary-400 text-white rounded-full flex items-center justify-center font-bold text-xl">SM</div>
+            <div class="ml-4">
+              <h4 class="text-lg font-bold text-gray-900">Sarah Mitchell</h4>
+              <p class="text-gray-500">Project Manager, UrbanBuild</p>
+            </div>
+          </div>
+          <p class="italic text-gray-600 mb-6">"The AI optimization suggestions alone have saved us 12% on material costs. The interface is intuitive and the reports are client-ready."</p>
+          <div class="flex text-yellow-400 mb-2">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <div class="border-t border-gray-100 pt-4 mt-4">
+            <p class="text-sm text-gray-500">Project: Residential Tower ($8.5M)</p>
+          </div>
+        </div>
+        <div class="glass testimonial-card p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+          <div class="flex items-center mb-6">
+            <div class="h-14 w-14 bg-gradient-to-r from-primary-500 to-primary-400 text-white rounded-full flex items-center justify-center font-bold text-xl">RK</div>
+            <div class="ml-4">
+              <h4 class="text-lg font-bold text-gray-900">Robert Kim</h4>
+              <p class="text-gray-500">Director, StructCo</p>
+            </div>
+          </div>
+          <p class="italic text-gray-600 mb-6">"Real-time market data integration means we're always working with current prices. Our clients appreciate the transparency in our bids."</p>
+          <div class="flex text-yellow-400 mb-2">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+          </div>
+          <div class="border-t border-gray-100 pt-4 mt-4">
+            <p class="text-sm text-gray-500">Project: Bridge Construction ($24M)</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats Section -->
+      <div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="glass p-6 rounded-xl" data-aos="fade-up">
+          <div class="text-4xl font-bold text-primary-600 mb-2">97%</div>
+          <p class="text-gray-600">Estimation Accuracy</p>
+        </div>
+        <div class="glass p-6 rounded-xl" data-aos="fade-up" data-aos-delay="100">
+          <div class="text-4xl font-bold text-primary-600 mb-2">65%</div>
+          <p class="text-gray-600">Time Saved</p>
+        </div>
+        <div class="glass p-6 rounded-xl" data-aos="fade-up" data-aos-delay="200">
+          <div class="text-4xl font-bold text-primary-600 mb-2">500+</div>
+          <p class="text-gray-600">Happy Clients</p>
+        </div>
+        <div class="glass p-6 rounded-xl" data-aos="fade-up" data-aos-delay="300">
+          <div class="text-4xl font-bold text-primary-600 mb-2">$15M</div>
+          <p class="text-gray-600">Client Savings</p>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Final CTA -->
+  <section class="py-20 bg-gradient-to-br from-primary-700 to-primary-900 text-white relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 text-center relative z-10">
+      <div class="max-w-3xl mx-auto" data-aos="fade-up">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to revolutionize your construction estimates?</h2>
+        <p class="text-xl text-primary-100 mb-10">Join the thousands of professionals who trust PrecisionBuild for accurate, AI-powered construction estimations.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="/signup" class="px-8 py-4 bg-white text-primary-700 font-bold rounded-xl hover:bg-gray-100 transition shadow-lg">
+            Get Started Free <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+          <a href="/demo" class="px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-primary-700 transition">
+            Book a Demo <i class="fas fa-calendar-alt ml-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="absolute top-0 left-0 w-full h-full opacity-10">
+      <div class="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-white"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-white"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white py-12 border-t border-gray-100 relative z-10">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center mb-4">
+            <i class="fas fa-cube text-primary-500 text-2xl mr-3"></i>
+            <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+          </div>
+          <p class="text-gray-600 mb-4">AI-powered construction estimation for the modern builder.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-500 hover:text-primary-500"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-gray-500 hover:text-primary-500"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="text-gray-500 hover:text-primary-500"><i class="fab fa-facebook"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Product</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Features</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Pricing</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Integrations</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Updates</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Resources</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Blog</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Guides</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Help Center</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">API Docs</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Company</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">About</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Careers</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Contact</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-primary-500">Legal</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-500 mb-4 md:mb-0">© 2023 PrecisionBuild. All rights reserved.</p>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-500 hover:text-primary-500">Privacy Policy</a>
+          <a href="#" class="text-gray-500 hover:text-primary-500">Terms of Service</a>
+          <a href="#" class="text-gray-500 hover:text-primary-500">Cookies</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <!-- AOS Animation Script -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>

@@ -1,0 +1,1006 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrecisionBuild Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'css/ai-assistant.css' %}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            },
+            accent: {
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+            },
+            success: {
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            warning: {
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+              700: '#a16207',
+              800: '#854d0e',
+              900: '#713f12',
+            },
+            error: {
+              100: '#fee2e2',
+              200: '#fecaca',
+              300: '#fca5a5',
+              400: '#f87171',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b',
+              900: '#7f1d1d',
+            }
+          },
+          animation: {
+            fadeIn: 'fadeIn 0.5s ease-out',
+            scaleIn: 'scaleIn 0.3s ease-out',
+            fadeSlide: 'fadeSlide 0.4s ease',
+            float: 'float 3s ease-in-out infinite',
+            pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            bounce: 'bounce 1s infinite'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 }
+            },
+            scaleIn: {
+              '0%': { transform: 'scale(0.95)', opacity: 0 },
+              '100%': { transform: 'scale(1)', opacity: 1 }
+            },
+            fadeSlide: {
+              'from': { opacity: 0, transform: 'translateY(10px) scale(0.98)' },
+              'to': { opacity: 1, transform: 'translateY(0) scale(1)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-5px)' }
+            },
+            pulse: {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: 0.5 }
+            },
+            bounce: {
+              '0%, 100%': {
+                transform: 'translateY(-25%)',
+                animationTimingFunction: 'cubic-bezier(0.8,0,1,1)'
+              },
+              '50%': {
+                transform: 'none',
+                animationTimingFunction: 'cubic-bezier(0,0,0.2,1)'
+              }
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .glass {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      border-radius: 1rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .dashboard-box {
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .dashboard-box:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .animate-step {
+      animation: fadeSlide 0.4s ease;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #0ea5e9, #0c4a6e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.7s ease;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 120px;
+      background-color: #0f172a;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      ring: 2px;
+      ring-color: rgba(14, 165, 233, 0.5);
+      border-color: #0ea5e9;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0284c7, #075985);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(203, 213, 225, 0.4);
+    }
+
+    .nav-link {
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      left: 0;
+      background-color: #0ea5e9;
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .nav-link.active::after {
+      width: 100%;
+    }
+
+    .step-indicator {
+      position: relative;
+    }
+
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: #e2e8f0;
+      z-index: -1;
+    }
+
+    .step-indicator .step {
+      background-color: #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .step-indicator .step.active {
+      background-color: #0ea5e9;
+      transform: scale(1.1);
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+    }
+
+    .step-indicator .step.completed {
+      background-color: #22c55e;
+    }
+
+    .floating-icon {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .pulse-animation {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .bounce-animation {
+      animation: bounce 1s infinite;
+    }
+  </style>
+  
+</head>
+
+<body class="font-sans bg-gradient-to-br from-primary-50 to-white text-secondary-800 min-h-screen">
+
+  <!-- Navigation -->
+  <nav class="bg-white/30 backdrop-blur-md shadow-md z-10 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+      <div class="flex items-center">
+        <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
+        <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+      </div>
+      <div class="flex space-x-4 items-center">
+        <a href="/" class="text-gray-600 hover:text-primary-500">Home</a>
+        <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
+        <a href="{% url 'accounts:login' %}" class="text-gray-600 hover:text-primary-500">Login</a>
+        <!-- <a href="{% url 'accounts:register' %}" class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a> -->
+      </div>
+      <div>
+        <a href="{% url 'accounts:register' %}"
+          class="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-700 btn-glow">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 animate-fadeIn">
+
+    <div class="flex justify-between items-center mb-12">
+      <div>
+        <p class="text-xs text-gray-400">Logged in as: {{ request.user }} (ID: {{ request.user.id }})</p>
+
+        <h1 class="text-4xl font-bold text-primary-800 tracking-tight">Welcome Back, <span
+            class="gradient-text">{{ request.user }} </span> 👷</h1>
+        <p class="text-secondary-500 mt-2">Here's what's happening with your projects today</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="relative tooltip">
+          <button class="p-2 rounded-full bg-white shadow hover:bg-primary-50 transition">
+            <i class="fas fa-bell text-secondary-500"></i>
+          </button>
+          <span class="absolute top-0 right-0 h-3 w-3 rounded-full bg-error-500"></span>
+          <span class="tooltip-text">3 new notifications</span>
+        </div>
+        <div class="relative tooltip">
+          <button class="p-2 rounded-full bg-white shadow hover:bg-primary-50 transition">
+            <i class="fas fa-envelope text-secondary-500"></i>
+          </button>
+          <span class="absolute top-0 right-0 h-3 w-3 rounded-full bg-success-500"></span>
+          <span class="tooltip-text">2 unread messages</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div class="dashboard-box glass p-6 animate-scaleIn">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-secondary-500 text-sm font-medium">Active Projects</p>
+            <h3 class="text-2xl font-bold text-primary-700 mt-1">8</h3>
+          </div>
+          <div class="p-3 rounded-full bg-primary-100 text-primary-600">
+            <i class="fas fa-folder-open text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="flex items-center text-sm text-success-600">
+            <i class="fas fa-arrow-up mr-1"></i>
+            <span>2 from last week</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-box glass p-6 animate-scaleIn delay-75">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-secondary-500 text-sm font-medium">Completed</p>
+            <h3 class="text-2xl font-bold text-primary-700 mt-1">24</h3>
+          </div>
+          <div class="p-3 rounded-full bg-success-100 text-success-600">
+            <i class="fas fa-check-circle text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="flex items-center text-sm text-success-600">
+            <i class="fas fa-arrow-up mr-1"></i>
+            <span>5 from last month</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-box glass p-6 animate-scaleIn delay-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-secondary-500 text-sm font-medium">Avg. Cost</p>
+            <h3 class="text-2xl font-bold text-primary-700 mt-1">$287K</h3>
+          </div>
+          <div class="p-3 rounded-full bg-accent-100 text-accent-600">
+            <i class="fas fa-dollar-sign text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="flex items-center text-sm text-error-600">
+            <i class="fas fa-arrow-down mr-1"></i>
+            <span>12% from last quarter</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-box glass p-6 animate-scaleIn delay-150">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-secondary-500 text-sm font-medium">On-Time Rate</p>
+            <h3 class="text-2xl font-bold text-primary-700 mt-1">92%</h3>
+          </div>
+          <div class="p-3 rounded-full bg-warning-100 text-warning-600">
+            <i class="fas fa-clock text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="flex items-center text-sm text-success-600">
+            <i class="fas fa-arrow-up mr-1"></i>
+            <span>7% from last year</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <!-- Start Project -->
+      <div class="dashboard-box glass p-8 animate-scaleIn">
+        <div class="flex items-start mb-4">
+          <div class="p-3 rounded-lg bg-primary-100 text-primary-600 mr-4">
+            <i class="fas fa-plus text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-primary-800">Start New Project</h2>
+            <p class="text-secondary-600 mt-1">Begin a new construction cost estimation project</p>
+          </div>
+        </div>
+        <button onclick="scrollToEstimator()"
+          class="btn-primary w-full mt-6 inline-flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium text-white shadow-md transition">
+          <i class="fas fa-arrow-right mr-2"></i>Get Started
+        </button>
+      </div>
+
+      <!-- Recent Projects -->
+      <div class="dashboard-box glass p-8 animate-scaleIn delay-75 lg:col-span-2">
+        <h2 class="text-xl font-semibold mb-6 text-primary-800 flex items-center">
+          <i class="fas fa-history text-primary-500 mr-3"></i> Recent Projects
+        </h2>
+        <ul class="space-y-4">
+          {% for project in projects %}
+          <li class="flex items-center justify-between p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="flex items-center">
+              <div class="p-2 rounded-full bg-primary-100 text-primary-600 mr-3">
+                <i class="fas fa-home"></i>
+              </div>
+              <div>
+                <p class="font-medium">{{ project.project_name }}</p>
+                <p class="text-sm text-secondary-500">Updated {{ project.created_at|timesince }} ago</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-primary-600">{{ project.total_area|floatformat:0|add:"000" }} sq ft</span>
+              <a href="{% url 'project_estimation_dashboard' project.id %}" class="text-sm bg-primary-500 text-white px-4 py-1.5 rounded-lg hover:bg-primary-600 transition">
+                View Cost Estimation Report
+              </a>
+            </div>
+           
+          </li>
+          {% empty %}
+          <li class="text-gray-500 text-sm">No recent projects found.</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Project Estimator Section -->
+      <div id="estimator-section" class="dashboard-box glass p-8 mb-12 animate-fadeIn lg:col-span-12 ">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl font-bold text-primary-800">
+            <i class="fas fa-calculator text-primary-500 mr-3"></i> Project Estimation Calculator
+          </h2>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm font-medium text-secondary-500">Step <span id="current-step">1</span> of 4</span>
+            <div class="p-1 rounded-full bg-primary-100 text-primary-600">
+              <i class="fas fa-question-circle text-sm"></i>
+            </div>
+          </div>
+        </div>
+
+        <div id="step-indicator" class="flex justify-between items-center mb-8 relative step-indicator">
+          <div
+            class="step w-8 h-8 rounded-full flex items-center justify-center bg-primary-600 text-white font-medium active">
+            1</div>
+          <div
+            class="step w-8 h-8 rounded-full flex items-center justify-center bg-secondary-200 text-secondary-600 font-medium">
+            2</div>
+          <div
+            class="step w-8 h-8 rounded-full flex items-center justify-center bg-secondary-200 text-secondary-600 font-medium">
+            3</div>
+          <div
+            class="step w-8 h-8 rounded-full flex items-center justify-center bg-secondary-200 text-secondary-600 font-medium">
+            4</div>
+        </div>
+
+        <form id="project-form">
+          {% csrf_token %}
+          <div id="step-content" class="space-y-6 animate-step grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+          <div class="flex justify-between mt-8 pt-6 border-t border-secondary-100">
+            <button type="button" id="back-btn"
+              class="btn-secondary px-6 py-2 rounded-lg text-secondary-700 font-medium transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled>
+              <i class="fas fa-arrow-left mr-2"></i> Back
+            </button>
+            <button type="submit" id="next-btn"
+              class="btn-primary px-6 py-2 rounded-lg text-white font-medium shadow transition duration-300">
+              Next <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    <!-- Charts and Additional Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 lg:col-span-6">
+      <!-- Resource Usage -->
+      <div class="dashboard-box glass p-8 lg:col-span-2">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-primary-800 flex items-center">
+            <i class="fas fa-chart-pie text-primary-500 mr-3"></i> Resource Allocation
+          </h2>
+          <div class="flex space-x-2">
+            <button class="px-3 py-1 text-xs rounded-full bg-primary-100 text-primary-600 font-medium">Weekly</button>
+            <button
+              class="px-3 py-1 text-xs rounded-full bg-secondary-100 text-secondary-600 font-medium">Monthly</button>
+            <button
+              class="px-3 py-1 text-xs rounded-full bg-secondary-100 text-secondary-600 font-medium">Yearly</button>
+          </div>
+        </div>
+        <canvas id="resourceChart" class="w-full h-64"></canvas>
+      </div>
+
+      <!-- Team Activity -->
+      <div class="dashboard-box glass p-8 lg:col-span-2">
+        <h2 class="text-xl font-semibold mb-6 text-primary-800 flex items-center">
+          <i class="fas fa-users text-primary-500 mr-3"></i> Team Activity
+        </h2>
+        <ul class="space-y-4">
+          <li class="flex items-center p-3 hover:bg-primary-50 rounded-lg transition">
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Team member"
+              class="h-10 w-10 rounded-full border-2 border-white shadow mr-3">
+            <div class="flex-1">
+              <p class="font-medium">Sarah Johnson</p>
+              <p class="text-sm text-secondary-500">Updated Project Blueprint</p>
+            </div>
+            <span class="text-xs text-secondary-400">2h ago</span>
+          </li>
+          <li class="flex items-center p-3 hover:bg-primary-50 rounded-lg transition">
+            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Team member"
+              class="h-10 w-10 rounded-full border-2 border-white shadow mr-3">
+            <div class="flex-1">
+              <p class="font-medium">Michael Chen</p>
+              <p class="text-sm text-secondary-500">Completed Site Inspection</p>
+            </div>
+            <span class="text-xs text-secondary-400">5h ago</span>
+          </li>
+          <li class="flex items-center p-3 hover:bg-primary-50 rounded-lg transition">
+            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Team member"
+              class="h-10 w-10 rounded-full border-2 border-white shadow mr-3">
+            <div class="flex-1">
+              <p class="font-medium">Emily Rodriguez</p>
+              <p class="text-sm text-secondary-500">Submitted Cost Estimate</p>
+            </div>
+            <span class="text-xs text-secondary-400">1d ago</span>
+          </li>
+          <li class="flex items-center p-3 hover:bg-primary-50 rounded-lg transition">
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Team member"
+              class="h-10 w-10 rounded-full border-2 border-white shadow mr-3">
+            <div class="flex-1">
+              <p class="font-medium">David Wilson</p>
+              <p class="text-sm text-secondary-500">Approved Material Order</p>
+            </div>
+            <span class="text-xs text-secondary-400">2d ago</span>
+          </li>
+        </ul>
+        <div class="mt-6 pt-6 border-t border-secondary-100">
+          <a href="#" class="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center">
+            View all activity <i class="fas fa-arrow-right ml-2 text-xs"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    </div>
+    <!-- Recent Updates -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Notifications -->
+      <div class="dashboard-box glass p-8">
+        <h2 class="text-xl font-semibold mb-6 text-primary-800 flex items-center">
+          <i class="fas fa-bell text-primary-500 mr-3"></i> Notifications
+        </h2>
+        <ul class="space-y-4">
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-warning-100 text-warning-600 mr-3 mt-1">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div>
+              <p class="font-medium">Deadline Approaching</p>
+              <p class="text-sm text-secondary-500">Project A submission due in 3 days</p>
+            </div>
+          </li>
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-success-100 text-success-600 mr-3 mt-1">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+              <p class="font-medium">Approval Received</p>
+              <p class="text-sm text-secondary-500">Client approved the blueprint</p>
+            </div>
+          </li>
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-primary-100 text-primary-600 mr-3 mt-1">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div>
+              <p class="font-medium">New Message</p>
+              <p class="text-sm text-secondary-500">From construction manager</p>
+            </div>
+          </li>
+        </ul>
+        <div class="mt-6 pt-6 border-t border-secondary-100">
+          <a href="#" class="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center">
+            View all notifications <i class="fas fa-arrow-right ml-2 text-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Latest Updates -->
+      <div class="dashboard-box glass p-8">
+        <h2 class="text-xl font-semibold mb-6 text-primary-800 flex items-center">
+          <i class="fas fa-sync-alt text-primary-500 mr-3"></i> Latest Updates
+        </h2>
+        <ul class="space-y-4">
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-primary-100 text-primary-600 mr-3 mt-1">
+              <i class="fas fa-database"></i>
+            </div>
+            <div>
+              <p class="font-medium">Material Database Updated</p>
+              <p class="text-sm text-secondary-500">New Q2 2023 pricing added</p>
+            </div>
+          </li>
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-success-100 text-success-600 mr-3 mt-1">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div>
+              <p class="font-medium">AI Estimation Improved</p>
+              <p class="text-sm text-secondary-500">Accuracy increased to 97%</p>
+            </div>
+          </li>
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-accent-100 text-accent-600 mr-3 mt-1">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div>
+              <p class="font-medium">Mobile App Updated</p>
+              <p class="text-sm text-secondary-500">New features available</p>
+            </div>
+          </li>
+        </ul>
+        <div class="mt-6 pt-6 border-t border-secondary-100">
+          <a href="#" class="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center">
+            View changelog <i class="fas fa-arrow-right ml-2 text-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Upcoming Tasks -->
+      <div class="dashboard-box glass p-8">
+        <h2 class="text-xl font-semibold mb-6 text-primary-800 flex items-center">
+          <i class="fas fa-tasks text-primary-500 mr-3"></i> Upcoming Tasks
+        </h2>
+        <ul class="space-y-4">
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-error-100 text-error-600 mr-3 mt-1">
+              <i class="fas fa-exclamation"></i>
+            </div>
+            <div>
+              <p class="font-medium">Site Inspection</p>
+              <p class="text-sm text-secondary-500">Due tomorrow at 10:00 AM</p>
+            </div>
+          </li>
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-warning-100 text-warning-600 mr-3 mt-1">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div>
+              <p class="font-medium">Client Meeting</p>
+              <p class="text-sm text-secondary-500">Friday at 2:30 PM</p>
+            </div>
+          </li>
+
+          <li class="flex items-start p-3 hover:bg-primary-50 rounded-lg transition">
+            <div class="p-2 rounded-full bg-secondary-100 text-secondary-600 mr-3 mt-1">
+              <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <div>
+              <p class="font-medium">Submit Invoice</p>
+              <p class="text-sm text-secondary-500">Due in 5 days</p>
+            </div>
+          </li>
+        </ul>
+        <div class="mt-6 pt-6 border-t border-secondary-100">
+          <a href="#" class="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center">
+            View all tasks <i class="fas fa-arrow-right ml-2 text-xs"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- AI Assistant Widget -->
+      <div id="ai-assistant-container">
+        <button id="ai-assistant-btn">
+          <i class="fas fa-robot"></i>
+        </button>
+        
+        <div id="ai-chat-container">
+          <div class="chat-header">
+            <h3>Construction AI Assistant</h3>
+            <button id="close-chat">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div id="chat-messages"></div>
+          
+          <div class="chat-input">
+            <div class="input-group">
+              <input id="user-input" type="text" placeholder="Type your question...">
+              <button id="send-btn">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+            <!-- <button id="voice-btn">
+              <i class="fas fa-microphone"></i>
+              <span>Speak</span>
+            </button> -->
+      
+          </div>  
+        </div>
+      </div>
+     
+  </main> 
+
+    <!-- Chart.js Script -->
+    <script>
+      const ctx = document.getElementById('resourceChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['CPU', 'Memory', 'Storage'],
+          datasets: [{
+            label: 'Usage (%)',
+            data: [40, 60, 75],
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.6)',
+              'rgba(234, 179, 8, 0.6)',
+              'rgba(16, 185, 129, 0.6)'
+            ],
+            borderColor: [
+              'rgba(59, 130, 246, 1)',
+              'rgba(234, 179, 8, 1)',
+              'rgba(16, 185, 129, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+
+      //   Estimator Form Logic
+      const steps = ['Basic Info', 'Dimensions', 'Materials', 'Labor'];
+      let activeStep = 0;
+      const projectData = {
+        projectName: '', location: '', projectType: '', totalArea: '',
+        length: '', width: '', height: '', floors: '',
+        concreteGrade: '', steelGrade: '', brickType: '', finishingType: '',
+        laborHours: '', skillLevel: '', equipmentNeeds: ''
+      };
+
+      const form = document.getElementById('project-form');
+      const stepContent = document.getElementById('step-content');
+      const backBtn = document.getElementById('back-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const stepIndicator = document.getElementById('step-indicator');
+
+      const renderStepIndicator = () => {
+        stepIndicator.innerHTML = steps.map((label, idx) => `
+      <div class="px-4 py-2 rounded-full text-sm font-semibold transition ${idx === activeStep
+            ? 'bg-primary-600 text-white shadow'
+            : 'bg-white text-gray-600 border border-gray-300'
+          }">${label}</div>
+    `).join('');
+      };
+
+      const renderStepContent = () => {
+        stepContent.classList.add('animate-step');
+        setTimeout(() => stepContent.classList.remove('animate-step'), 400);
+
+        stepContent.innerHTML = '';
+        switch (activeStep) {
+          case 0:
+            stepContent.innerHTML = `
+          <div>
+            <label class="block text-gray-700 mb-1">🏷 Project Name</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="projectName" placeholder="My Construction Project" required />
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">📍 Location</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="location" placeholder="City, Country" required />
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">🏗 Project Type</label>
+            <select class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="projectType" required>
+              <option value="">Select Project Type</option>
+              <option value="residential">Residential</option>
+              <option value="commercial">Commercial</option>
+              <option value="industrial">Industrial</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">📏 Total Area</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="totalArea" type="number" placeholder="Area in sq ft" required />
+          </div>
+        `;
+            break;
+          case 1:
+            stepContent.innerHTML = `
+          <div>
+            <label class="block text-gray-700 mb-1">Length</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="length" type="number" placeholder="Length (ft)" required />
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Width</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="width" type="number" placeholder="Width (ft)" required />
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Height</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="height" type="number" placeholder="Height (ft)" required />
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Floors</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="floors" type="number" placeholder="No. of Floors" required />
+          </div>
+        `;
+            break;
+          case 2:
+            stepContent.innerHTML = `
+          <div>
+            <label class="block text-gray-700 mb-1">Concrete Grade</label>
+            <select class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="concreteGrade" required>
+              <option value="">Select Grade</option>
+              <option value="M20">M20</option>
+              <option value="M25">M25</option>
+              <option value="M30">M30</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Steel Grade</label>
+            <select class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="steelGrade" required>
+              <option value="">Select Grade</option>
+              <option value="Fe415">Fe415</option>
+              <option value="Fe500">Fe500</option>
+              <option value="Fe550">Fe550</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Brick Type</label>
+            <select class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="brickType" required>
+              <option value="">Select Type</option>
+              <option value="clay">Clay Bricks</option>
+              <option value="concrete">Concrete Blocks</option>
+              <option value="flyash">Fly Ash Bricks</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Finishing Type</label>
+            <select class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="finishingType" required>
+              <option value="">Select Type</option>
+              <option value="basic">Basic</option>
+              <option value="standard">Standard</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+        `;
+            break;
+          case 3:
+            stepContent.innerHTML = `
+          <div>
+            <label class="block text-gray-700 mb-1">Labor Hours</label>
+            <input class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="laborHours" type="number" placeholder="Estimated hours" required />
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Skill Level</label>
+            <select class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="skillLevel" required>
+              <option value="">Select Level</option>
+              <option value="basic">Basic</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="expert">Expert</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-gray-700 mb-1">Required Equipment</label>
+            <textarea class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary-400" name="equipmentNeeds" rows="3" placeholder="List of required equipment..."></textarea>
+          </div>
+        `;
+            break;
+        }
+      };
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+          projectData[key] = value;
+        }
+
+        if (activeStep === steps.length - 1) {
+          fetch('/save-project-estimate/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(projectData)
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.message) {
+                alert('✅ Project saved successfully!\nID: ' + data.id);
+                 // ✅ Redirect to cost estimation dashboard
+                window.location.href = `/project-estimate/${data.id}/dashboard/`;
+                activeStep = 0;
+                render();
+              } else {
+                alert('❌ Error: ' + data.error);
+              }
+            })
+            .catch(err => {
+              console.error('Submission error:', err);
+              alert('Something went wrong!');
+            });
+        }
+        else {
+          activeStep++;
+          render();
+        }
+      });
+
+      backBtn.addEventListener('click', () => {
+        if (activeStep > 0) {
+          activeStep--;
+          render();
+        }
+      });
+
+      function render() {
+        renderStepIndicator();
+        renderStepContent();
+        backBtn.disabled = activeStep === 0;
+        nextBtn.textContent = activeStep === steps.length - 1 ? 'Submit 🚀' : 'Next ➡';
+      }
+
+
+      function scrollToEstimator() {
+        document.getElementById('estimator-section').scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+
+      // Initialize the form
+        render();
+    </script>
+    <!-- AI Assistant Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+    <script src="{% static 'js/ai-assistant.js' %}"></script>
+    <!-- Initialize the AI Assistant -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Use environment variable or secure storage for API key
+        const API_KEY = 'AIzaSyDD8vgyPzWGCjh3zNxN25lk33eumZ6JHZ4'; // Replace with your valid API key
+        initAIAssistant(API_KEY);
+      });
+    </script>
+
+</body>
+
+</html>

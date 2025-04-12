@@ -1,0 +1,592 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estimation Dashboard | {{ project.project_name }}</title>
+
+  <!-- Load Tailwind CSS from CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Add your custom Tailwind configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            },
+            accent: {
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+            },
+            success: {
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            warning: {
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+              700: '#a16207',
+              800: '#854d0e',
+              900: '#713f12',
+            },
+            error: {
+              100: '#fee2e2',
+              200: '#fecaca',
+              300: '#fca5a5',
+              400: '#f87171',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b',
+              900: '#7f1d1d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Load Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+  <!-- Load Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/ai-assistant.css' %}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+
+  <!-- Load Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Custom Styles -->
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #0ea5e9, #0c4a6e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .animate-step {
+      animation: fadeSlide 0.4s ease;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-primary-50 to-white">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md z-10 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+      <div class="flex items-center">
+        <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
+        <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+      </div>
+      <div class="flex space-x-4 items-center">
+        <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
+        <a href="{% url 'user_dashboard' user.id %}" class="text-gray-600 hover:text-primary-500">Dashboard</a>
+        <a href="{% url 'accounts:logout' %}" class="text-gray-600 hover:text-primary-500">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div id="dashboard-report">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold text-primary-800 tracking-tight">
+            <span class="gradient-text">Estimation Dashboard</span> for {{ project.project_name }}
+          </h1>
+          <p class="text-secondary-500 mt-2">Created on {{ project.created_at|date:"M d, Y" }}</p>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="downloadPDF()"
+            class="px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2 justify-center">
+            <i class="fas fa-download"></i> Export PDF
+          </button>
+        </div>
+      </div>
+
+      <div id="dashboard-report">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- Total Cost Card -->
+          <div class="card p-6 transition-all duration-300 hover:shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-secondary-500 text-sm font-medium">Total Estimated Cost</p>
+                <h3 class="text-2xl font-bold text-primary-700 mt-1">₹{{ total_cost|intcomma }}</h3>
+              </div>
+              <div class="p-3 rounded-full bg-primary-100 text-primary-600">
+                <i class="fas fa-rupee-sign text-xl"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="flex items-center text-sm text-gray-500">
+                <span>Based on ₹1,500 per sq ft</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Area Card -->
+          <div class="card p-6 transition-all duration-300 hover:shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-secondary-500 text-sm font-medium">Total Area</p>
+                <h3 class="text-2xl font-bold text-primary-700 mt-1">{{ project.total_area|intcomma }} sq ft</h3>
+              </div>
+              <div class="p-3 rounded-full bg-success-100 text-success-600">
+                <i class="fas fa-ruler-combined text-xl"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="flex items-center text-sm text-gray-500">
+                <span class="capitalize">{{ project.project_type }} construction</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline Card -->
+          <div class="card p-6 transition-all duration-300 hover:shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-secondary-500 text-sm font-medium">Estimated Timeline</p>
+                <h3 class="text-2xl font-bold text-primary-700 mt-1">{{ estimated_months }} Months</h3>
+              </div>
+              <div class="p-3 rounded-full bg-warning-100 text-warning-600">
+                <i class="fas fa-calendar-alt text-xl"></i>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="flex items-center text-sm text-gray-500">
+                <span>₹{{ monthly_budget|intcomma }} per month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- Monthly Cost Timeline -->
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-primary-800 flex items-center">
+                <i class="fas fa-chart-line text-primary-500 mr-3"></i> Monthly Cost Timeline
+              </h2>
+              <div class="flex gap-2">
+                <button class="px-3 py-1 text-xs bg-primary-100 text-primary-600 rounded-full">6 Months</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-primary-800 flex items-center">
+                <i class="fas fa-chart-line text-primary-500 mr-3"></i>Project Stage Timeline
+              </h2>
+            </div>
+            <div class="chart-container">
+              <canvas id="timelineChart" height="120"></canvas>
+            </div>
+          </div>
+
+          <!-- Cost Distribution -->
+          <div class="card p-6">
+            <h2 class="text-xl font-semibold text-primary-800 mb-4 flex items-center">
+              <i class="fas fa-chart-pie text-primary-500 mr-3"></i> Cost Distribution
+            </h2>
+            <div class="chart-container">
+              <canvas id="pieChart"></canvas>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              {% for item in material_breakdown %}
+              <div class="px-3 py-1 text-xs rounded-full"
+                style="background-color: {{ item.color }}20; color: {{ item.color }}; border: 1px solid {{ item.color }}40;">
+                {{ item.name }} ({{ item.percent }})
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Material Breakdown -->
+        <div class="card p-6 mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-primary-800 flex items-center">
+              <i class="fas fa-cubes text-primary-500 mr-3"></i> Material Cost Breakdown
+            </h2>
+            <!-- <div class="relative">
+              <select
+                class="appearance-none bg-gray-100 border-0 rounded-lg pl-3 pr-8 py-2 text-sm focus:ring-2 focus:ring-primary-200">
+                <option>Sort by Cost</option>
+                <option>Sort by Material</option>
+                <option>Sort by Percentage</option>
+              </select>
+              <i class="fas fa-chevron-down absolute right-3 top-3 text-xs text-gray-500"></i>
+            </div> -->
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200 text-gray-500 text-left">
+                  <th class="pb-3 font-medium">Material</th>
+                  <th class="pb-3 font-medium text-right">Percentage</th>
+                  <th class="pb-3 font-medium text-right">Estimated Cost</th>
+              
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in material_breakdown %}
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                  <td class="py-4">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 rounded-full mr-3" style="background-color: {{ item.color }}"></div>
+                      {{ item.name }}
+                    </div>
+                  </td>
+                  <td class="py-4 text-right">
+                    <span class="font-medium">{{ item.percent }}</span>
+                  </td>
+                  <td class="py-4 text-right font-medium">₹{{ item.amount|intcomma }}</td>
+                
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-end">
+          <button
+            class="px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2 justify-center">
+            <i class="fas fa-download"></i> Export PDF
+          </button>
+        </div>
+
+
+        <!-- AI Assistant Widget -->
+        <div id="ai-assistant-container">
+          <button id="ai-assistant-btn">
+            <i class="fas fa-robot"></i>
+          </button>
+
+          <div id="ai-chat-container">
+            <div class="chat-header">
+              <h3>Construction AI Assistant</h3>
+              <button id="close-chat">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div id="chat-messages"></div>
+
+            <div class="chat-input">
+              <div class="input-group">
+                <input id="user-input" type="text" placeholder="Type your question...">
+                <button id="send-btn">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+             
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+
+    <script>
+      // Material Breakdown Data
+      const breakdown = {{ material_json| safe }};
+      // Monthly Costs Data
+
+      const totalCost = {{ total_cost| safe }};
+      console.log("total Costs:", totalCost);
+
+
+      const monthlyData = {{ monthly_costs| safe }};
+      const monthlyCosts = monthlyData.map(item => item.cost);
+      const monthyLabels = ['1st Month', '2nd Month', '3rd Month', '4th Month', '5th Month', '6th Month'];
+
+      // Assign colors to materials if not already assigned
+      const colors = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+      breakdown.forEach((item, index) => {
+        item.color = colors[index % colors.length];
+      });
+
+      const ctx = document.getElementById('barChart').getContext('2d');
+
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['1st Month', '2nd Month', '3rd Month', '4th Month', '5th Month', '6th Month'],
+          datasets: [{
+            label: 'Monthly Cost (₹)',
+            data: monthlyCosts,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.4)',
+              'rgba(54, 162, 235, 0.4)',
+              'rgba(255, 206, 86, 0.4)',
+              'rgba(75, 192, 192, 0.4)',
+              'rgba(153, 102, 255, 0.4)',
+              'rgba(255, 159, 64, 0.4)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: true
+          },
+          animation: {
+            duration: 500,
+            easing: 'easeOutQuart'
+          },
+          responsive: true,
+
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const index = context.dataIndex;
+                  return `₹${monthlyCosts[index]} (${monthlyPercentages[index]}%)`;
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: `To complete this construction in 6 months, money required is as below`,
+              font: {
+                size: 16,
+                weight: 'bold'
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMax: Math.max(...monthlyCosts) + 1000,
+              ticks: {
+                callback: value => '₹' + value
+              }
+            }
+          }
+        }
+      });
+
+      // Pie Chart - Cost Distribution
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      const pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+          labels: breakdown.map(x => x.name),
+          datasets: [{
+            data: breakdown.map(x => x.amount),
+            backgroundColor: breakdown.map(x => x.color),
+            borderWidth: 0,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: true
+          },
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: {
+              display: { position: 'bottom' }
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const percent = context.dataset.data[context.dataIndex] /
+                    context.dataset.data.reduce((a, b) => a + b, 0) * 100;
+                  return `${label}: ₹${value.toLocaleString('en-IN')} (${percent.toFixed(1)}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const stageData = {{ stage_breakdown| safe }};
+
+      const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+      new Chart(timelineCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Project Timeline'],
+          datasets: stageData.map((stage, idx) => ({
+            label: stage.stage,
+            data: [stage.months],
+            backgroundColor: ['#60a5fa', '#34d399', '#fbbf24'][idx],
+            stack: 'timeline'
+          }))
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Months' }
+            }
+          }
+        }
+      });
+    </script>
+    <!-- AI Assistant Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+    <script src="{% static 'js/ai-assistant.js' %}"></script>
+    <!-- Initialize the AI Assistant -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Use environment variable or secure storage for API key
+        const API_KEY = 'AIzaSyDD8vgyPzWGCjh3zNxN25lk33eumZ6JHZ4'; // Replace with your valid API key
+        initAIAssistant(API_KEY);
+      });
+    </script>
+
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+      async function downloadPDF() {
+        const element = document.getElementById('dashboard-report');
+
+        // Scroll to top to ensure full capture
+        window.scrollTo(0, 0);
+
+        const canvas = await html2canvas(element, {
+          scale: 2, // higher resolution
+          useCORS: true
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('Construction_Estimation_Report.pdf');
+      }
+    </script>
+
+</body>
+
+</html>

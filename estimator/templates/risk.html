@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Construction Risk Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985'
+                        },
+                        danger: {
+                            100: '#fee2e2',
+                            400: '#f87171',
+                            600: '#dc2626'
+                        },
+                        warning: {
+                            100: '#fef3c7',
+                            400: '#fbbf24',
+                            600: '#d97706'
+                        },
+                        success: {
+                            100: '#dcfce7',
+                            400: '#4ade80',
+                            600: '#16a34a'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'tooltip-fade': 'tooltipFade 0.2s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        tooltipFade: {
+                            '0%': { opacity: '0', transform: 'translateY(5px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-dark {
+            background: rgba(2, 132, 199, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .input-glass {
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .input-glass:focus {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.3);
+        }
+        
+        .risk-meter {
+            height: 20px;
+            background: linear-gradient(90deg, #16a34a 0%, #fbbf24 50%, #dc2626 100%);
+        }
+        
+        .risk-indicator {
+            transition: all 0.5s ease;
+        }
+        
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #4b5563;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tooltip-icon:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #1f2937;
+        }
+        
+        .tooltip-content {
+            position: absolute;
+            z-index: 10;
+            width: 220px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            font-size: 13px;
+            line-height: 1.4;
+            color: #374151;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(5px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .tooltip-container:hover .tooltip-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            animation: tooltipFade 0.2s ease-out;
+            pointer-events: auto;
+        }
+        
+        .tooltip-content::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 10px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent rgba(255, 255, 255, 0.9) transparent;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gradient-to-br from-primary-50 to-primary-100 text-gray-800 min-h-screen md:p-8">
+    <nav class="bg-white shadow-md z-10 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+          <div class="flex items-center">
+            <i class="fas fa-cube text-primary-500 text-2xl mr-2"></i>
+            <span class="text-xl font-bold text-primary-900">PrecisionBuild</span>
+          </div>
+          <div class="flex space-x-4 items-center">
+            <a href="{% url 'riskPredictor' %}" class="text-gray-600 hover:text-primary-500">ML Based Risk Assesment</a>
+            <a href="{% url 'user_dashboard' user.id %}" class="text-gray-600 hover:text-primary-500">Dashboard</a>
+            <a href="{% url 'accounts:logout' %}" class="text-gray-600 hover:text-primary-500">Logout</a>
+          </div>
+        </div>
+      </nav>
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="glass p-6 rounded-xl mb-8 text-center animate-fade-in">
+            <h1 class="text-4xl font-bold text-primary-800 mb-2">Construction Risk Predictor</h1>
+            <p class="text-lg text-gray-600">Assess potential risks in your construction project based on multiple factors</p>
+        </header>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Form Section -->
+            <div class="lg:col-span-2">
+                <div class="glass p-6 rounded-xl shadow-lg animate-slide-up">
+                    <h2 class="text-2xl font-bold mb-6 text-primary-700 flex items-center">
+                        <i class="fas fa-hard-hat mr-3"></i> Project Parameters
+                    </h2>
+                    
+                    <form method="POST" class="space-y-5">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <!-- Environmental Factors -->
+                            <div class="glass-dark p-4 rounded-lg">
+                                <h3 class="font-semibold text-primary-700 mb-3 flex items-center">
+                                    <i class="fas fa-cloud-sun mr-2"></i> Environmental
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Temperature (°C)
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Ambient temperature at site</strong><br>
+                                                    Typical range: -10°C to 45°C<br>
+                                                    Extreme temperatures increase risk
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="temperature" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Humidity (%)
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Relative humidity at site</strong><br>
+                                                    Typical range: 20% to 90%<br>
+                                                    High humidity affects materials and worker comfort
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="humidity" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Vibration Level
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Measured vibration intensity</strong><br>
+                                                    Scale: 0 (none) to 50 (extreme)<br>
+                                                    High vibration can damage structures and equipment
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="vibration_level" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Resource Factors -->
+                            <div class="glass-dark p-4 rounded-lg">
+                                <h3 class="font-semibold text-primary-700 mb-3 flex items-center">
+                                    <i class="fas fa-boxes mr-2"></i> Resources
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Material Usage
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Daily material consumption</strong><br>
+                                                    Measured in units/day<br>
+                                                    Higher usage may indicate waste or theft
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="material_usage" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Worker Count
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Number of workers on site</strong><br>
+                                                    Typical range: 5-100<br>
+                                                    Too few may delay, too many may cause safety issues
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" name="worker_count" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Energy Consumption
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Daily energy usage</strong><br>
+                                                    Measured in kWh/day<br>
+                                                    High consumption may indicate inefficiencies
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="energy_consumption" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Schedule Factors -->
+                            <div class="glass-dark p-4 rounded-lg">
+                                <h3 class="font-semibold text-primary-700 mb-3 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i> Schedule
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Cost Deviation
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Difference from budget</strong><br>
+                                                    Positive = over budget<br>
+                                                    Negative = under budget<br>
+                                                    Large deviations indicate planning issues
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="cost_deviation" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Time Deviation (days)
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Difference from schedule</strong><br>
+                                                    Positive = ahead of schedule<br>
+                                                    Negative = behind schedule<br>
+                                                    Large deviations indicate timeline risks
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="time_deviation" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Safety Factors -->
+                            <div class="glass-dark p-4 rounded-lg">
+                                <h3 class="font-semibold text-primary-700 mb-3 flex items-center">
+                                    <i class="fas fa-shield-alt mr-2"></i> Safety
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Safety Incidents
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Reported safety incidents</strong><br>
+                                                    Count in current reporting period<br>
+                                                    Any number above 0 increases risk significantly
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" name="safety_incidents" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Equipment Utilization (%)
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Equipment usage rate</strong><br>
+                                                    Range: 0-100%<br>
+                                                    Optimal range: 60-80%<br>
+                                                    Too high may indicate overuse, too low may indicate waste
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <input type="number" step="0.1" name="equipment_utilization_rate" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                                            Material Shortage
+                                            <div class="tooltip-container">
+                                                <span class="tooltip-icon">i</span>
+                                                <div class="tooltip-content">
+                                                    <strong>Material shortage status</strong><br>
+                                                    0 = No shortage (normal operations)<br>
+                                                    1 = Shortage reported (delays expected)<br>
+                                                    Significantly impacts project timeline
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <select name="material_shortage_alert" class="mt-1 p-2 w-full rounded-md input-glass border border-gray-200">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="w-full py-3 px-4 rounded-md shadow-lg bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium hover:from-primary-700 hover:to-primary-800 transition duration-300 ease-in-out transform hover:scale-[1.01] flex items-center justify-center">
+                            <i class="fas fa-calculator mr-2"></i> Calculate Risk Score
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="lg:col-span-1">
+                {% if predicted_risk %}
+                <div class="glass p-6 rounded-xl shadow-lg animate-slide-up">
+                    <h2 class="text-2xl font-bold mb-6 text-primary-700 flex items-center">
+                        <i class="fas fa-chart-line mr-3"></i> Risk Assessment
+                    </h2>
+                    
+                    <!-- Risk Score Display -->
+                    <div class="text-center mb-6">
+                        <div class="text-sm font-medium text-gray-600 mb-1">Overall Risk Score</div>
+                        <div class="text-5xl font-bold mb-2 
+                            {% if predicted_risk < 30 %}text-success-600
+                            {% elif predicted_risk < 60 %}text-warning-600
+                            {% else %}text-danger-600
+                            {% endif %}">
+                            {{ predicted_risk }}%
+                        </div>
+                        <div class="text-lg font-medium 
+                            {% if predicted_risk < 30 %}text-success-600
+                            {% elif predicted_risk < 60 %}text-warning-600
+                            {% else %}text-danger-600
+                            {% endif %}">
+                            {% if predicted_risk < 30 %}Low Risk
+                            {% elif predicted_risk < 60 %}Moderate Risk
+                            {% else %}High Risk
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Meter -->
+                    <div class="mb-6">
+                        <div class="risk-meter rounded-full overflow-hidden mb-2">
+                            <div class="risk-indicator h-full" style="width: {{ predicted_risk }}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-600">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Factors Chart -->
+                    <div class="mb-6">
+                        <canvas id="riskChart" height="200"></canvas>
+                        <script>
+                            const ctx = document.getElementById('riskChart').getContext('2d');
+                            const riskChart = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Environmental', 'Resources', 'Schedule', 'Safety'],
+                                    datasets: [{
+                                        data: [25, 30, 20, 25], // Replace with actual factor percentages
+                                        backgroundColor: [
+                                            'rgba(75, 192, 192, 0.7)',
+                                            'rgba(54, 162, 235, 0.7)',
+                                            'rgba(255, 206, 86, 0.7)',
+                                            'rgba(255, 99, 132, 0.7)'
+                                        ],
+                                        borderColor: [
+                                            'rgba(75, 192, 192, 1)',
+                                            'rgba(54, 162, 235, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                            'rgba(255, 99, 132, 1)'
+                                        ],
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    plugins: {
+                                        legend: {
+                                            position: 'bottom',
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: 'Risk Factor Distribution',
+                                            font: {
+                                                size: 14
+                                            }
+                                        }
+                                    },
+                                    cutout: '65%'
+                                }
+                            });
+                        </script>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    <div class="glass-dark p-4 rounded-lg">
+                        <h3 class="font-semibold text-primary-700 mb-3 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i> Recommendations
+                        </h3>
+                        <ul class="space-y-2 text-sm">
+                            {% if predicted_risk >= 60 %}
+                            <li class="flex items-start">
+                                <i class="fas fa-exclamation-triangle text-danger-600 mr-2 mt-0.5"></i>
+                                <span>Implement immediate safety protocols and review project timeline</span>
+                            </li>
+                            {% endif %}
+                            {% if predicted_risk >= 30 %}
+                            <li class="flex items-start">
+                                <i class="fas fa-boxes text-warning-600 mr-2 mt-0.5"></i>
+                                <span>Monitor material supply chain closely</span>
+                            </li>
+                            {% endif %}
+                            <li class="flex items-start">
+                                <i class="fas fa-hard-hat text-primary-600 mr-2 mt-0.5"></i>
+                                <span>Conduct regular safety briefings with workers</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-chart-bar text-primary-600 mr-2 mt-0.5"></i>
+                                <span>Track equipment utilization weekly</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                {% else %}
+                <div class="glass p-6 rounded-xl shadow-lg text-center animate-fade-in flex flex-col items-center justify-center h-full">
+                    <div class="bg-primary-100 rounded-full p-4 mb-4 animate-pulse-slow">
+                        <i class="fas fa-hard-hat text-primary-600 text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary-700 mb-2">No Risk Assessment Yet</h3>
+                    <p class="text-gray-600 mb-4">Enter your project parameters to calculate the risk score</p>
+                    <div class="text-gray-500 text-sm">
+                        <i class="fas fa-arrow-left mr-1"></i> Fill out the form on the left
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="glass mt-8 p-4 rounded-xl text-center text-sm text-gray-600 animate-fade-in">
+            <p>Construction Risk Predictor v1.0 | Powered by AI/ML Models</p>
+            <p class="mt-1">For accurate results, please provide all parameters</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Simple animation for the risk indicator
+        if (document.querySelector('.risk-indicator')) {
+            const indicator = document.querySelector('.risk-indicator');
+            indicator.style.width = '0%';
+            setTimeout(() => {
+                indicator.style.width = '{{ predicted_risk }}%';
+            }, 300);
+        }
+        
+        // Position tooltips dynamically to prevent overflow
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltips = document.querySelectorAll('.tooltip-container');
+            
+            tooltips.forEach(tooltip => {
+                tooltip.addEventListener('mouseover', function() {
+                    const tooltipContent = this.querySelector('.tooltip-content');
+                    const rect = this.getBoundingClientRect();
+                    
+                    // Check if tooltip would go off screen right
+                    if (rect.left + rect.width + 220 > window.innerWidth) {
+                        tooltipContent.style.left = 'auto';
+                        tooltipContent.style.right = '0';
+                        tooltipContent.style.transformOrigin = 'right bottom';
+                        tooltipContent.querySelector('::after').style.left = 'auto';
+                        tooltipContent.querySelector('::after').style.right = '10px';
+                    } else {
+                        tooltipContent.style.left = '0';
+                        tooltipContent.style.right = 'auto';
+                        tooltipContent.style.transformOrigin = 'left bottom';
+                    }
+                    
+                    // Check if tooltip would go off screen top
+                    if (rect.top - tooltipContent.offsetHeight - 10 < 0) {
+                        tooltipContent.style.top = '100%';
+                        tooltipContent.style.bottom = 'auto';
+                        tooltipContent.style.marginTop = '6px';
+                        tooltipContent.querySelector('::after').style.top = 'auto';
+                        tooltipContent.querySelector('::after').style.bottom = '100%';
+                        tooltipContent.querySelector('::after').style.borderColor = 'transparent transparent rgba(255, 255, 255, 0.9) transparent';
+                    } else {
+                        tooltipContent.style.top = 'auto';
+                        tooltipContent.style.bottom = '100%';
+                        tooltipContent.style.marginTop = '0';
+                        tooltipContent.style.marginBottom = '6px';
+                        tooltipContent.querySelector('::after').style.top = '100%';
+                        tooltipContent.querySelector('::after').style.bottom = 'auto';
+                        tooltipContent.querySelector('::after').style.borderColor = 'rgba(255, 255, 255, 0.9) transparent transparent transparent';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
